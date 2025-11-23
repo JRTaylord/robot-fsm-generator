@@ -14,7 +14,7 @@ program
 
 program
   .command('analyze')
-  .description('Analyze a codebase to extract state machine patterns')
+  .description('Analyze a codebase to extract state machine patterns using Claude CLI')
   .argument('<workspace>', 'Path to the workspace/project directory')
   .option('-o, --output <dir>', 'Output directory for generated files', './fsm-output')
   .option('-f, --files <files...>', 'Specific files to analyze (relative to workspace)')
@@ -90,7 +90,7 @@ program
 
 program
   .command('interactive')
-  .description('Interactive mode - chat with Claude about your state machine')
+  .description('Interactive mode - chat with Claude about your state machine using Claude CLI')
   .argument('<workspace>', 'Path to the workspace/project directory')
   .option('-f, --files <files...>', 'Specific files to analyze')
   .action(async (workspace, options) => {
@@ -106,14 +106,14 @@ program
 
     const workspacePath = path.resolve(workspace);
     const analyzer = new CodeToFSMAnalyzer(workspacePath);
-    
+
     // Read files once
     console.log('📖 Reading files...');
-    const filePaths = options.files 
+    const filePaths = options.files
       ? options.files.map(f => path.resolve(workspacePath, f))
       : await analyzer.scanWorkspace();
     const files = analyzer.readFiles(filePaths);
-    
+
     const conversationHistory = [];
     
     // Initial context message
@@ -149,24 +149,30 @@ Please help the user understand the state machine logic in this code.`;
 
       try {
         console.log('\n🤔 Claude is thinking...\n');
-        
-        const response = await fetch("https://api.anthropic.com/v1/messages", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "claude-sonnet-4-20250514",
-            max_tokens: 4000,
-            messages: conversationHistory
-          })
+
+        // Use Claude CLI for interactive chat
+        const { spawn } = require('child_process');
+        const prompt = conversationHistory.map(msg =>
+          msg.role === 'user' ? `User: ${msg.content}` : `Assistant: ${msg.content}`
+        ).join('\n\n');
+
+        const assistantMessage = await new Promise((resolve, reject) => {
+          const isWindows = process.platform === 'win32';
+          const claude = spawn(isWindows ? 'claude.cmd' : 'claude', ['--print', prompt], {
+            stdio: ['ignore', 'pipe', 'pipe'],
+            shell: isWindows
+          });
+          let output = '';
+
+          claude.stdout.on('data', (data) => { output += data.toString(); });
+          claude.on('close', (code) => {
+            if (code !== 0) reject(new Error(`Claude CLI exited with code ${code}`));
+            else resolve(output.trim());
+          });
+          claude.on('error', (err) => reject(new Error(`Failed to start Claude CLI: ${err.message}. Make sure 'claude' is installed and in your PATH.`)));
         });
 
-        const data = await response.json();
-        const assistantMessage = data.content[0].text;
-        
         conversationHistory.push({ role: "assistant", content: assistantMessage });
-        
         console.log(`Claude: ${assistantMessage}\n`);
       } catch (error) {
         console.error('❌ Error:', error.message);

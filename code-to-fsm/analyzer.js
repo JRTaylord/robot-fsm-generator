@@ -6,6 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 const { glob } = require('glob');
+const { spawn } = require('child_process');
 
 class CodeToFSMAnalyzer {
   constructor(workspacePath, options = {}) {
@@ -13,8 +14,7 @@ class CodeToFSMAnalyzer {
     this.options = {
       filePatterns: options.filePatterns || ['**/*.py', '**/*.js', '**/*.ts', '**/*.cpp', '**/*.c', '**/*.java'],
       excludePatterns: options.excludePatterns || ['**/node_modules/**', '**/venv/**', '**/build/**', '**/.git/**'],
-      maxFileSize: options.maxFileSize || 100000, // 100KB max per file
-      model: options.model || 'claude-sonnet-4-20250514'
+      maxFileSize: options.maxFileSize || 100000 // 100KB max per file
     };
   }
 
@@ -123,29 +123,66 @@ stateDiagram-v2
   }
 
   /**
-   * Call Claude API to analyze the code
+   * Call Claude CLI to analyze the code
    */
   async analyzeWithClaude(prompt) {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: this.options.model,
-        max_tokens: 4000,
-        messages: [
-          { role: "user", content: prompt }
-        ]
-      })
+    console.log('🖥️  Using Claude CLI...');
+
+    // Write prompt to temp file to avoid command line length limits
+    const os = require('os');
+    const tmpFile = path.join(os.tmpdir(), `claude-prompt-${Date.now()}.txt`);
+    fs.writeFileSync(tmpFile, prompt, 'utf-8');
+
+    return new Promise((resolve, reject) => {
+      // On Windows, we need to use 'claude.cmd' or set shell: true
+      const isWindows = process.platform === 'win32';
+
+      // Use shell redirection to read from temp file
+      const command = isWindows
+        ? `claude.cmd --print < "${tmpFile}"`
+        : `claude --print < "${tmpFile}"`;
+
+      const claude = spawn(command, [], {
+        stdio: ['ignore', 'pipe', 'pipe'],
+        shell: true
+      });
+
+      let output = '';
+      let errorOutput = '';
+
+      claude.stdout.on('data', (data) => {
+        output += data.toString();
+      });
+
+      claude.stderr.on('data', (data) => {
+        errorOutput += data.toString();
+      });
+
+      claude.on('close', (code) => {
+        // Clean up temp file
+        try {
+          fs.unlinkSync(tmpFile);
+        } catch (err) {
+          // Ignore cleanup errors
+        }
+
+        if (code !== 0) {
+          reject(new Error(`Claude CLI exited with code ${code}: ${errorOutput}`));
+        } else {
+          resolve(output.trim());
+        }
+      });
+
+      claude.on('error', (err) => {
+        // Clean up temp file on error
+        try {
+          fs.unlinkSync(tmpFile);
+        } catch (e) {
+          // Ignore cleanup errors
+        }
+        reject(new Error(`Failed to start Claude CLI: ${err.message}. Make sure 'claude' is installed and in your PATH.`));
+      });
     });
-
-    if (!response.ok) {
-      throw new Error(`Claude API error: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data.content[0].text;
   }
 
   /**

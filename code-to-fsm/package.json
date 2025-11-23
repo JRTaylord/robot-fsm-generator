@@ -10,7 +10,13 @@
     "test": "node cli.js analyze example-robot",
     "demo": "node cli.js analyze example-robot --to-xstate"
   },
-  "keywords": ["state-machine", "fsm", "mermaid", "xstate", "code-analysis"],
+  "keywords": [
+    "state-machine",
+    "fsm",
+    "mermaid",
+    "xstate",
+    "code-analysis"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {

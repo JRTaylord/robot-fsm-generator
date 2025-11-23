@@ -10,13 +10,24 @@ Analyze your codebase to automatically extract state machine patterns and genera
 - **Interactive Mode**: Chat with Claude about your state machine
 - **Multi-Language Support**: Works with Python, JavaScript, TypeScript, C++, Java, and more
 
-## 🚀 Installation
+## 🚀 Installation & Setup
 
+**Requirements:**
+- Node.js 14+
+- [Claude Code CLI](https://claude.com/claude-code)
+
+**Install:**
 ```bash
 cd code-to-fsm
 npm install
-npm link  # Optional: install globally
 ```
+
+**Verify Claude CLI:**
+```bash
+claude --version
+```
+
+See [SETUP.md](./SETUP.md) for detailed setup instructions and troubleshooting.
 
 ## 📖 Usage
 
