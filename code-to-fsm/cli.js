@@ -69,14 +69,22 @@ program
       }
 
       console.log('\n✨ Done! Your state machine has been extracted.');
-      console.log(`\n📊 View your Mermaid diagram: ${savedFiles.mermaidPath}`);
-      console.log(`📄 Read full analysis: ${savedFiles.analysisPath}`);
-      
+      console.log(`\n🌐 Open in browser: ${savedFiles.htmlPath}`);
+      console.log(`📊 Mermaid source: ${savedFiles.mermaidPath}`);
+      console.log(`📄 Full analysis: ${savedFiles.analysisPath}`);
+
       if (options.toXstate) {
         console.log(`\n💡 Next steps:`);
         console.log(`   1. Review the generated state machine`);
         console.log(`   2. Refactor your code to use XState`);
         console.log(`   3. Use XState Inspector for debugging: https://stately.ai/viz`);
+      }
+
+      // Auto-open HTML file in browser on Windows
+      if (process.platform === 'win32') {
+        console.log(`\n🚀 Opening diagram in your default browser...`);
+        const { exec } = require('child_process');
+        exec(`start "" "${savedFiles.htmlPath}"`);
       }
 
     } catch (error) {
