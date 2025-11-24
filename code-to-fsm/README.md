@@ -1,14 +1,14 @@
 # Code to FSM Analyzer
 
-Analyze your codebase to automatically extract state machine patterns and generate Mermaid diagrams + XState code.
+Analyze your codebase to automatically extract state machine patterns and generate beautiful Mermaid diagrams.
 
 ## 🌟 Key Features
 
 - **Intelligent Code Analysis**: Uses Claude to understand state machine logic in any programming language
-- **Automatic Diagram Generation**: Creates beautiful Mermaid state diagrams
-- **XState Integration**: Optionally converts to executable XState machines
+- **Automatic Diagram Generation**: Creates beautiful Mermaid state diagrams with interactive HTML viewer
 - **Interactive Mode**: Chat with Claude about your state machine
 - **Multi-Language Support**: Works with Python, JavaScript, TypeScript, C++, Java, and more
+- **Auto-Open in Browser**: Generated diagrams open automatically with zoom and export features
 
 ## 🚀 Installation & Setup
 
@@ -36,9 +36,6 @@ See [SETUP.md](./SETUP.md) for detailed setup instructions and troubleshooting.
 ```bash
 # Basic analysis
 node cli.js analyze /path/to/your/robot/project
-
-# With XState generation
-node cli.js analyze /path/to/your/robot/project --to-xstate
 
 # Analyze specific files
 node cli.js analyze ./my-project -f robot_controller.py motor_driver.py

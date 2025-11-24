@@ -85,9 +85,6 @@ node cli.js analyze <workspace> [options]
 - `-f, --files <files...>` - Specific files to analyze
 - `-p, --patterns <patterns...>` - File patterns to match (e.g., "*.py" "*.js")
 - `--focus <area>` - Focus on specific component
-- `--to-xstate` - Also generate XState code
-- `--xstate-format <format>` - XState format: esm, cjs, or json (default: esm)
-- `--machine-id <id>` - XState machine ID (default: extractedMachine)
 
 **Examples:**
 
@@ -95,17 +92,14 @@ node cli.js analyze <workspace> [options]
 # Analyze entire project
 node cli.js analyze ./my-robot-project
 
-# Analyze with XState generation
-node cli.js analyze ./my-robot-project --to-xstate
-
 # Analyze specific files
 node cli.js analyze ./my-project -f controller.py motor.py
 
 # Focus on specific component
 node cli.js analyze ./my-project --focus "navigation system"
 
-# Custom output location and format
-node cli.js analyze ./my-project -o ./diagrams --to-xstate --xstate-format cjs
+# Custom output location
+node cli.js analyze ./my-project -o ./diagrams
 ```
 
 ### Interactive Command

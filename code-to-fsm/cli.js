@@ -9,7 +9,7 @@ const program = new Command();
 
 program
   .name('code-to-fsm')
-  .description('Analyze code to extract state machines and generate Mermaid/XState diagrams')
+  .description('Analyze code to extract state machines and generate Mermaid diagrams')
   .version('1.0.0');
 
 program
@@ -20,9 +20,6 @@ program
   .option('-f, --files <files...>', 'Specific files to analyze (relative to workspace)')
   .option('-p, --patterns <patterns...>', 'File patterns to match (e.g., "*.py" "*.js")')
   .option('--focus <area>', 'Focus area or component to analyze (e.g., "robot controller")')
-  .option('--to-xstate', 'Also generate XState machine code')
-  .option('--xstate-format <format>', 'XState output format: esm, cjs, json', 'esm')
-  .option('--machine-id <id>', 'XState machine ID', 'extractedMachine')
   .action(async (workspace, options) => {
     try {
       const workspacePath = path.resolve(workspace);
@@ -50,35 +47,10 @@ program
       const outputDir = path.resolve(options.output);
       const savedFiles = analyzer.saveResults(results, outputDir);
 
-      // Optionally convert to XState
-      if (options.toXstate) {
-        console.log('\n🔄 Converting to XState...');
-        
-        // Load the mermaid-to-xstate parser
-        const MermaidToXStateParser = require('../mermaid-to-xstate/parser');
-        const parser = new MermaidToXStateParser();
-        
-        const machine = parser.parse(results.mermaidDiagram);
-        machine.id = options.machineId;
-        
-        const xstateCode = parser.generateXStateCode(machine, options.xstateFormat);
-        const xstatePath = path.join(outputDir, `state-machine.${options.xstateFormat === 'json' ? 'json' : 'js'}`);
-        
-        fs.writeFileSync(xstatePath, xstateCode, 'utf-8');
-        console.log(`💾 XState machine saved to: ${xstatePath}`);
-      }
-
       console.log('\n✨ Done! Your state machine has been extracted.');
       console.log(`\n🌐 Open in browser: ${savedFiles.htmlPath}`);
       console.log(`📊 Mermaid source: ${savedFiles.mermaidPath}`);
       console.log(`📄 Full analysis: ${savedFiles.analysisPath}`);
-
-      if (options.toXstate) {
-        console.log(`\n💡 Next steps:`);
-        console.log(`   1. Review the generated state machine`);
-        console.log(`   2. Refactor your code to use XState`);
-        console.log(`   3. Use XState Inspector for debugging: https://stately.ai/viz`);
-      }
 
       // Auto-open HTML file in browser on Windows
       if (process.platform === 'win32') {

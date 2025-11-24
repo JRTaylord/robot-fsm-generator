@@ -1,21 +1,21 @@
 {
   "name": "code-to-fsm",
   "version": "1.0.0",
-  "description": "Analyze code to extract state machines and generate Mermaid/XState diagrams",
+  "description": "Analyze code to extract state machines and generate Mermaid diagrams",
   "main": "analyzer.js",
   "bin": {
     "code-to-fsm": "./cli.js"
   },
   "scripts": {
     "test": "node cli.js analyze example-robot",
-    "demo": "node cli.js analyze example-robot --to-xstate"
+    "demo": "node cli.js analyze example-robot"
   },
   "keywords": [
     "state-machine",
     "fsm",
     "mermaid",
-    "xstate",
-    "code-analysis"
+    "code-analysis",
+    "visualization"
   ],
   "author": "",
   "license": "MIT",

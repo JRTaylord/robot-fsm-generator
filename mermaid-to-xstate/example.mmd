@@ -1,8 +1,0 @@
-stateDiagram-v2
-    [*] --> Idle
-    Idle --> Loading: FETCH
-    Loading --> Success: SUCCESS
-    Loading --> Error: ERROR
-    Success --> [*]
-    Error --> Idle: RETRY
-    Error --> [*]: GIVE_UP
