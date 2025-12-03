@@ -13,11 +13,12 @@ let panZoomInstance = null;
 window.addEventListener("load", () => {
   setTimeout(() => {
     const svg = document.querySelector("#diagram-container svg");
+    console.log(svg);
     if (svg && typeof svgPanZoom !== "undefined") {
       panZoomInstance = svgPanZoom(svg, {
         zoomEnabled: true,
         controlIconsEnabled: true,
-        // fit: true,
+        fit: true,
         center: true,
         minZoom: 0.3,
         maxZoom: 10,
